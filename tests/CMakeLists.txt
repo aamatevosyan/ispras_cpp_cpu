@@ -8,7 +8,7 @@ add_executable(tests
 # gtest sources
     gtest/gtest-all.cc
     gtest/gtest_main.cc
-)
+        ../src/lib/custom_exceptions.hpp ../src/lib/utils.hpp ../src/lib/disassembly.cpp ../src/lib/disassembly.h)
 
 # add pthread for unix systems
 if (UNIX)

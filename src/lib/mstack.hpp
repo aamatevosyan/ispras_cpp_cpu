@@ -5,11 +5,12 @@
 #ifndef ISPRAS_CPP_CPU_MSTACK_H
 #define ISPRAS_CPP_CPU_MSTACK_H
 
-#define MAX_SIZE 10
+#define MAX_SIZE 4096
 
 #include <stdexcept>
 #include <sstream>
 #include <functional>
+#include "custom_exceptions.hpp"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ class mstack {
     function<unsigned long(T)> _hash;
 
 public:
-    mstack(function<unsigned long(T)> _hash, int size = MAX_SIZE);    // constructor
+    mstack(function<unsigned long(T)> _hash = nullptr, int size = MAX_SIZE);    // constructor
 
     void push(T);
 
@@ -44,6 +45,8 @@ public:
 
     bool hashChanged();
 
+    void reset();
+
     ~mstack() {
         delete[] arr;
     }
@@ -61,7 +64,7 @@ mstack<T>::mstack(function<unsigned long(T)> _hash, int size) {
 template<class T>
 void mstack<T>::push(T x) {
     if (isFull())
-        throw runtime_error("OverFlow");
+        throw stack_exception("Stack OverFlow");
 
     arr[++top] = x;
 }
@@ -75,7 +78,7 @@ T mstack<T>::pop() {
 template<class T>
 T mstack<T>::peek() {
     if (isEmpty())
-        throw runtime_error("UnderFlow");
+        throw stack_exception("Stack UnderFlow");
 
     return arr[top];
 }
@@ -114,12 +117,18 @@ string mstack<T>::dump() {
         oss << "\t}\n";
 
         oss << "}\n";
+    } else {
+        oss << "Empty stack.\n";
     }
     return oss.str();
 }
 
 template<typename T>
 unsigned long mstack<T>::getHash() {
+    if (_hash == nullptr) {
+        return 0;
+    }
+
     unsigned long res = HASH;
 
     for (int i = 0; i <= capacity + 1; i++)
@@ -135,6 +144,11 @@ bool mstack<T>::hashChanged() {
 
     lastHash = currentHash;
     return currentHash != tmp;
+}
+
+template<class T>
+void mstack<T>::reset() {
+    top = 0;
 }
 
 #endif //ISPRAS_CPP_CPU_MSTACK_H
